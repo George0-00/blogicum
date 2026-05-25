@@ -5,7 +5,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic import CreateView, DetailView, UpdateView, ListView, DeleteView
+from django.views.generic import (
+    CreateView,
+    DetailView,
+    UpdateView,
+    ListView,
+    DeleteView
+)
 from django.shortcuts import redirect, render
 from django.core.paginator import Paginator
 from django.db.models import Count
@@ -110,7 +116,11 @@ class ProfileDetailView(DetailView):
                 'category', 'location'
             ).filter(author=author).order_by('-pub_date')
         else:
-            post_queryset = get_published_posts().filter(author=author).order_by('-pub_date')
+            post_queryset = (
+                get_published_posts()
+                .filter(author=author)
+                .order_by('-pub_date')
+            )
 
         paginator = Paginator(post_queryset, 10)
         page_number = self.request.GET.get('page')
