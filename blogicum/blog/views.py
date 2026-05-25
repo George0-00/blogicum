@@ -22,6 +22,7 @@ from .models import Category, Post, Comment
 User = get_user_model()
 
 FIRST_FIVE = 5
+PAGINATE = 10
 
 
 def get_published_posts():
@@ -34,6 +35,12 @@ def get_published_posts():
         is_published=True,
         category__is_published=True
     )
+
+
+def get_paginator(request, queryset, per_page=PAGINATE):
+    paginator = Paginator(queryset, per_page)
+    page_number = request.GET.get('page')
+    return paginator.get_page(page_number)
 
 
 class PostUpdateView(UpdateView):
@@ -122,9 +129,11 @@ class ProfileDetailView(DetailView):
                 .order_by('-pub_date')
             )
 
-        paginator = Paginator(post_queryset, 10)
-        page_number = self.request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
+        page_obj = get_paginator(
+            self.request,
+            post_queryset,
+            per_page=PAGINATE
+        )
 
         context['page_obj'] = page_obj
         context['posts'] = page_obj
@@ -141,14 +150,14 @@ class IndexListView(ListView):
     model = Post
     template_name = 'blog/index.html'
     context_object_name = 'post_list'
-    paginate_by = 10
+    paginate_by = PAGINATE
 
     def get_queryset(self):
         return get_published_posts().order_by('-pub_date')
 
 
 def post_detail(request, post_id):
-    template = "blog/detail.html"
+    template = 'blog/detail.html'
 
     post = get_object_or_404(
         Post.objects.select_related('author', 'category', 'location'),
@@ -176,7 +185,7 @@ class CategoryListView(ListView):
     model = Post
     template_name = 'blog/category.html'
     context_object_name = 'page_obj'
-    paginate_by = 10
+    paginate_by = PAGINATE
 
     def get_queryset(self):
         self.category = get_object_or_404(
@@ -239,6 +248,6 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
     def get_success_url(self):
-        return reverse_lazy(
+        return reverse(
             "blog:profile", kwargs={"username": self.object.username}
         )
