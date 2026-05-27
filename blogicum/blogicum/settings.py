@@ -34,6 +34,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 CSRF_FAILURE_VIEW = 'pages.views.crsf_failure'
 
+ALLOWED_HOSTS = [
+    'www.George.pythonanywhere.com',
+    'George.pythonanywhere.com'
+]
+
 
 # Application definition
 
